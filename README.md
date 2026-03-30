@@ -2,8 +2,8 @@
 
 Jointly optimizes robot poses and landmark positions from noisy odometry and observations. Includes a step-by-step visualizer to inspect each solver iteration.
 
-![opt_easy](https://github.com/user-attachments/assets/9dd34fcc-7451-48f4-a49c-8229a37a68b3)
-![opt_hard](https://github.com/user-attachments/assets/0b8ff7d2-eede-4ee9-881b-1003996bf68a)
+![opt_easy](https://github.com/user-attachments/assets/44583907-f560-40db-86ee-bdcf7e06204c)
+![opt_hard](https://github.com/user-attachments/assets/86d14550-d1e6-4a04-acbf-de1066b8f7ae)
 
 ## Dependencies
 

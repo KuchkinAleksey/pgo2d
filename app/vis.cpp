@@ -13,23 +13,24 @@
 #include <cstdio>
 #include <random>
 
-static const Color COL_BG       = {22,  22,  28,  255};
-static const Color COL_LABEL    = {130, 130, 145, 255};
+static const Color COL_BG       = {245, 245, 248, 255};
+static const Color COL_LABEL    = {100, 100, 110, 255};
 
-static const Color COL_GT       = {100, 100, 115, 180};   // ground truth
-static const Color COL_INIT     = {180, 70,  75,  160};   // initial
-static const Color COL_OPT      = {60,  190, 170, 255};   // optimized
-static const Color COL_EDGE     = {55,  55,  65,  100};   // odometry edges
-static const Color COL_LOOP     = {220, 140, 40,  180};   // loop closure
-static const Color COL_LM_GT    = {100, 100, 115, 100};   // landmark GT
-static const Color COL_LM_INIT  = {180, 70,  75,  80};    // landmark initial
-static const Color COL_LM_OPT   = {60,  190, 170, 200};   // landmark optimized
+static const Color COL_GT       = {160, 160, 170, 200};   // ground truth
+static const Color COL_INIT     = {210, 50,  60,  200};   // initial (odometry)
+static const Color COL_OPT      = {20,  20,  20,  255};   // optimized
+static const Color COL_EDGE     = {180, 180, 195, 140};   // odometry edges
+static const Color COL_LOOP     = {220, 130, 20,  220};   // loop closure
+static const Color COL_LM_GT    = {160, 160, 170, 140};   // landmark GT
+static const Color COL_LM_INIT  = {210, 50,  60,  100};   // landmark initial
+static const Color COL_LM_OPT   = {20,  20,  20,  220};   // landmark optimized
 
 static Font g_font = {};
 
 static constexpr float kSpacing = 3.0f;
 
 static void draw_text(const char* text, float x, float y, float size, Color col) {
+    DrawTextEx(g_font, text, {x + 1, y}, size, kSpacing, col);
     DrawTextEx(g_font, text, {x, y}, size, kSpacing, col);
 }
 
@@ -92,7 +93,9 @@ static void draw_pose_tri(Vector2 pos, float angle, float sz, Color col) {
     Vector2 right = {pos.x + front_len * cosf(angle - fov_half),
                      pos.y + front_len * sinf(angle - fov_half)};
 
-    DrawTriangleLines(rear, right, left, col);
+    DrawLineEx(rear, left, 3.5f, col);
+    DrawLineEx(left, right, 3.5f, col);
+    DrawLineEx(right, rear, 3.5f, col);
 }
 
 /// Draw a connected sequence of poses as triangular frustums
@@ -102,7 +105,7 @@ static void draw_trajectory(const ViewXform& vw, const std::vector<Pose2D>& pose
     for (int i = 0; i + 1 < (int)poses.size(); ++i) {
         auto a = vw.to_screen(poses[i].x, poses[i].y);
         auto b = vw.to_screen(poses[i + 1].x, poses[i + 1].y);
-        DrawLineEx(a, b, 1.5f, line_col);
+        DrawLineEx(a, b, 3.5f, line_col);
     }
     for (auto& p : poses) {
         auto sp = vw.to_screen(p.x, p.y);
@@ -360,7 +363,7 @@ void App::draw_scene() {
     for (auto& ei : edge_info) {
         auto a = vw.to_screen(poses_now[ei.from].x, poses_now[ei.from].y);
         auto b = vw.to_screen(poses_now[ei.to].x,   poses_now[ei.to].y);
-        DrawLineEx(a, b, ei.is_loop_closure ? 2.5f : 1.0f,
+        DrawLineEx(a, b, ei.is_loop_closure ? 4.0f : 2.5f,
                    ei.is_loop_closure ? COL_LOOP : COL_EDGE);
     }
 
@@ -368,15 +371,15 @@ void App::draw_scene() {
     for (int i = 0; i < (int)gt_landmarks.size(); ++i) {
         if (i < (int)landmark_visible.size() && !landmark_visible[i]) continue;
         auto sp = vw.to_screen(gt_landmarks[i].x, gt_landmarks[i].y);
-        DrawLineEx({sp.x - 3, sp.y - 3}, {sp.x + 3, sp.y + 3}, 1.0f, COL_LM_GT);
-        DrawLineEx({sp.x + 3, sp.y - 3}, {sp.x - 3, sp.y + 3}, 1.0f, COL_LM_GT);
+        DrawLineEx({sp.x - 5, sp.y - 5}, {sp.x + 5, sp.y + 5}, 2.0f, COL_LM_GT);
+        DrawLineEx({sp.x + 5, sp.y - 5}, {sp.x - 5, sp.y + 5}, 2.0f, COL_LM_GT);
     }
 
     // initial landmarks
     for (int i = 0; i < (int)initial_landmarks.size(); ++i) {
         if (i < (int)landmark_visible.size() && !landmark_visible[i]) continue;
         auto sp = vw.to_screen(initial_landmarks[i].x, initial_landmarks[i].y);
-        DrawCircleV(sp, 2.5f, COL_LM_INIT);
+        DrawCircleV(sp, 4.5f, COL_LM_INIT);
     }
 
     // optimized landmarks at current iteration
@@ -385,15 +388,15 @@ void App::draw_scene() {
         for (int i = 0; i < (int)lm.size(); ++i) {
             if (i < (int)landmark_visible.size() && !landmark_visible[i]) continue;
             auto sp = vw.to_screen(lm[i].x, lm[i].y);
-            DrawCircleV(sp, 3.5f, COL_LM_OPT);
+            DrawCircleV(sp, 5.5f, COL_LM_OPT);
         }
     }
 
     // trajectories
-    draw_trajectory(vw, ground_truth,  COL_GT,   COL_GT,   7.0f);
-    draw_trajectory(vw, initial_poses, COL_INIT, COL_INIT, 6.0f);
+    draw_trajectory(vw, ground_truth,  COL_GT,   COL_GT,   36.0f);
+    draw_trajectory(vw, initial_poses, COL_INIT, COL_INIT, 30.0f);
     if (!opt_history.empty())
-        draw_trajectory(vw, opt_history[f], COL_OPT, COL_OPT, 9.0f);
+        draw_trajectory(vw, opt_history[f], COL_OPT, COL_OPT, 42.0f);
 }
 
 void App::draw_hud() {

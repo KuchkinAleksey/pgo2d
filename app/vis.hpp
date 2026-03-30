@@ -22,8 +22,8 @@ struct EdgeInfo {
 };
 
 struct App {
-    static constexpr int WIDTH  = 1024;
-    static constexpr int HEIGHT = 768;
+    static constexpr int WIDTH  = 1280;
+    static constexpr int HEIGHT = 900;
 
     // pose-graph data
     std::vector<Pose2D>   ground_truth;
